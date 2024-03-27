@@ -24,16 +24,16 @@ const SportExercisesPage = () => {
       <h1>All exercises {sport?.name}</h1>
       <Button onClick={() => navigate(-1)}>Back</Button>
       {isLoading && <CircularProgress />}
-      {data &&
-        data.length &&
-        data.map((exercise) => (
-          <Button
-            key={exercise.id}
-            onClick={() => setSelectedExercise(exercise)}
-          >
-            {exercise.name}
-          </Button>
-        ))}
+      {data && data.length
+        ? data.map((exercise) => (
+            <Button
+              key={exercise.id}
+              onClick={() => setSelectedExercise(exercise)}
+            >
+              {exercise.name}
+            </Button>
+          ))
+        : null}
       <GenericModal
         isOpen={!!selectedExercise}
         onClose={() => setSelectedExercise(null)}

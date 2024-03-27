@@ -11,17 +11,21 @@ import {
   TextField,
 } from '@mui/material';
 import { useEffect, useState } from 'react';
-import {
-  Exercise,
-  Sport,
-  useFetchExercisesQuery,
-  useFetchSportsQuery,
-} from '../services/sport.service';
-import GenericModal from '../components/GenericModal';
+import { Exercise, Sport, useFetchSportsQuery } from '../services/sport.service';
 import PageWrapper from '../components/PageWrapper';
 import styled from '@emotion/styled';
 import RowCenteredContainer from '../components/RowCenteredContainer';
 import Dumbell from '../images/dumbbell.svg';
+import { useAppDispatch } from '../store';
+import {
+  CreateSerieDto,
+  chooseSession,
+  createNewSession,
+  createSeries,
+  selectCurrentSession,
+} from '../slices/sessionSlice';
+import ExerciseSelector from '../components/ExerciseSelector';
+import { useSelector } from 'react-redux';
 // TODO : load templates, put them in select
 
 const PrepareSessionContainer = styled(Container)(() => ({
@@ -31,7 +35,7 @@ const PrepareSessionContainer = styled(Container)(() => ({
   gap: 20,
 }));
 
-const ExerciseSelector = styled(Box)(() => ({
+const ExercisesContainer = styled(Box)(() => ({
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'start',
@@ -41,9 +45,7 @@ const ExerciseSelector = styled(Box)(() => ({
 }));
 
 export type SessionOptions = {
-  sportId: number;
   template: string;
-  name: string;
   customExercises?: Exercise[];
 };
 
@@ -76,29 +78,31 @@ const StartButton = styled(Box, { shouldForwardProp: (propName) => propName !== 
 
 const NewSessionPage = () => {
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+  const currentSession = useSelector(selectCurrentSession);
+
   const [sessionChoice, setSessionChoice] = useState<string>('');
   const [selectedSport, setSelectedSport] = useState<string>('');
-  const [isExerciseModalOpen, setIsExerciseModalOpen] = useState(false);
   const [selectedExercises, setSelectedExercises] = useState<Exercise[]>([]);
-  const [exercisesChoiceList, setExerciseChoiceList] = useState<Exercise[]>([]);
   const [sessionName, setSessionName] = useState('');
   const { data: sportsList } = useFetchSportsQuery();
-  const { data: exercisesList } = useFetchExercisesQuery(parseInt(selectedSport || '0'));
 
   useEffect(() => {
-    buildExercisesList();
-  }, [selectedExercises, selectedSport, exercisesList]);
+    dispatch(chooseSession(1));
+  }, []);
 
   const startSession = () => {
     console.log('start session');
     const sessionOptions: SessionOptions = {
       template: sessionChoice,
-      sportId: parseInt(selectedSport),
-      name: sessionName,
     };
     if (sessionChoice === 'custom') {
       sessionOptions.customExercises = selectedExercises;
     }
+
+    dispatch(
+      createNewSession({ sportId: parseInt(selectedSport), name: sessionName, sessionOptions })
+    );
 
     navigate('/currentSession', { state: { sessionOptions } });
   };
@@ -112,29 +116,12 @@ const NewSessionPage = () => {
     setSelectedExercises([]);
   };
 
-  const addSelectedExercise = (exercise: Exercise) => {
-    setSelectedExercises([...selectedExercises, exercise]);
-  };
-
   const removeSelectedExercise = (exercise: Exercise) => {
     const index = selectedExercises.findIndex((ex) => ex.id === exercise.id);
 
     const exercises = [...selectedExercises];
     exercises.splice(index, 1);
     setSelectedExercises(exercises);
-  };
-
-  const buildExercisesList = () => {
-    const choiceList: Exercise[] = [];
-    exercisesList?.forEach((exercise: Exercise) => {
-      if (!selectedExercises.find((ex) => ex.id === exercise.id)) {
-        choiceList.push(exercise);
-      }
-    });
-    if (!choiceList.length) {
-      setIsExerciseModalOpen(false);
-    }
-    setExerciseChoiceList(choiceList);
   };
 
   return (
@@ -196,7 +183,7 @@ const NewSessionPage = () => {
               </Select>
             </FormControl>
             {selectedSport && (
-              <ExerciseSelector>
+              <ExercisesContainer>
                 {selectedExercises &&
                   selectedExercises.map((exercise) => (
                     <Box
@@ -208,10 +195,12 @@ const NewSessionPage = () => {
                       <Button onClick={() => removeSelectedExercise(exercise)}>X</Button>
                     </Box>
                   ))}
-                {exercisesChoiceList.length ? (
-                  <Button onClick={() => setIsExerciseModalOpen(true)}>Add an exercise</Button>
-                ) : null}
-              </ExerciseSelector>
+                <ExerciseSelector
+                  sportId={parseInt(selectedSport)}
+                  selectedExercises={selectedExercises}
+                  setSelectedExercises={setSelectedExercises}
+                />
+              </ExercisesContainer>
             )}
           </RowCenteredContainer>
         )}
@@ -225,22 +214,6 @@ const NewSessionPage = () => {
           />
         </StartButton>
       </PrepareSessionContainer>
-      <GenericModal
-        isOpen={isExerciseModalOpen}
-        onClose={() => setIsExerciseModalOpen(false)}
-      >
-        <p>Choose an exercise</p>
-        <Box>
-          {exercisesChoiceList.map((ex) => (
-            <Button
-              key={ex.id}
-              onClick={() => addSelectedExercise(ex)}
-            >
-              {ex.name}
-            </Button>
-          ))}
-        </Box>
-      </GenericModal>
     </PageWrapper>
   );
 };

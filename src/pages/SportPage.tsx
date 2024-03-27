@@ -15,19 +15,19 @@ const SportPage = () => {
 
       {isLoading && <CircularProgress />}
       <Box>
-        {data &&
-          data.length &&
-          data.map((sport) => (
-            <Button
-              key={sport.id}
-              onClick={() => {
-                console.log(sport);
-                navigate(sport.id.toString());
-              }}
-            >
-              {sport.name}
-            </Button>
-          ))}
+        {data && data.length
+          ? data.map((sport) => (
+              <Button
+                key={sport.id}
+                onClick={() => {
+                  console.log(sport);
+                  navigate(sport.id.toString());
+                }}
+              >
+                {sport.name}
+              </Button>
+            ))
+          : null}
       </Box>
     </>
   );

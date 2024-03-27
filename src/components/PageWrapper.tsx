@@ -23,7 +23,7 @@ const Header = styled(Container)(() => ({
 const PageWrapper: React.FC<IProps> = ({ children }) => {
   const navigate = useNavigate();
   const pathname = useLocation().pathname;
-  console.log('pathname', pathname);
+  // console.log('pathname', pathname);
   return (
     <StyledContainer>
       {pathname !== '/' && (

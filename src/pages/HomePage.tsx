@@ -5,12 +5,14 @@ import { useAuth } from '../provider/AuthProvider';
 import { useNavigate } from 'react-router-dom';
 import GenericCard from '../components/GenericCard';
 import PageWrapper from '../components/PageWrapper';
+import { useSelector } from 'react-redux';
+import { selectCurrentSession } from '../slices/sessionSlice';
 
 function HomePage() {
   const { user } = useContext(UserContext);
   const { setToken } = useAuth();
   const navigate = useNavigate();
-
+  const currentSession = useSelector(selectCurrentSession);
   const handleLogout = () => {
     setToken(null);
     navigate('/', { replace: true });
@@ -31,6 +33,11 @@ function HomePage() {
         <GenericCard onClick={() => navigate('/mySessions', { replace: true })}>
           <h2>My sessions</h2>
         </GenericCard>
+        {currentSession && (
+          <GenericCard onClick={() => navigate('/currentSession', { replace: true })}>
+            <h2>Current session</h2>
+          </GenericCard>
+        )}
         <GenericCard onClick={() => navigate('/sport', { replace: true })}>
           <h2>All Sports</h2>
         </GenericCard>

@@ -1,24 +1,18 @@
-import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
-  Box,
-  Button,
-  TextField,
-} from '@mui/material';
-import React, { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { Accordion, AccordionDetails, AccordionSummary, Box, Button } from '@mui/material';
+import { useEffect } from 'react';
 import PageWrapper from '../components/PageWrapper';
-import { useFetchExercisesQuery, useFetchSportsQuery } from '../services/sport.service';
 import { useAppDispatch } from '../store';
-import { Session, fetchUserSessions, selectAllSessions } from '../slices/sessionSlice';
+import { chooseSession, fetchUserSessions, selectAllSessions } from '../slices/sessionSlice';
 import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 
 function MySessionsPage() {
   const sessions = useSelector(selectAllSessions);
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
 
   useEffect(() => {
+    // TODO : do it on startup, the update when new session or updated session
     dispatch(fetchUserSessions());
   }, []);
 
@@ -27,7 +21,22 @@ function MySessionsPage() {
       {sessions &&
         sessions.map((session) => (
           <Accordion key={session.id}>
-            <AccordionSummary>{`${session.name} - ${session.sportName} - ${session.createdAt}`}</AccordionSummary>
+            <AccordionSummary>
+              {`${session.name} - ${session.sportName} - ${session.createdAt}`}
+              {!session.isFinished && (
+                <Button
+                  onClick={(ev) => {
+                    console.log('zefezf');
+                    dispatch(chooseSession(session.id));
+
+                    navigate('/currentSession', { state: {} });
+                    ev.stopPropagation();
+                  }}
+                >
+                  Go
+                </Button>
+              )}
+            </AccordionSummary>
             <AccordionDetails>
               <Box>
                 {session.exercises.map((exercise) => {
@@ -37,15 +46,16 @@ function MySessionsPage() {
                       flexDirection="row"
                       alignItems="center"
                       gap={1}
+                      key={exercise.id}
                     >
-                      <h2>{exercise.exerciseName} - </h2>
+                      <h2>{exercise.name} - </h2>
                       <Box
                         display="flex"
                         flexDirection="row"
                         gap={1}
                       >
                         {exercise.series.map((serie) => (
-                          <h3>{` ${serie.value}`}</h3>
+                          <h3 key={serie.id}>{` ${serie.value}`}</h3>
                         ))}
                       </Box>
                     </Box>

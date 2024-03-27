@@ -1,0 +1,15 @@
+version: '3'
+services:
+  nest-api-docker:
+    environment:
+      - NODE_ENV=development
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./:/usr/app
+    container_name: nest-api-docker
+    expose:
+      - '6000'
+    ports:
+      - '6000:6000'

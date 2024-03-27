@@ -6,8 +6,17 @@ import { Exercise, useFetchExercisesQuery, useFetchSportsQuery } from '../servic
 import { SessionOptions } from './NewSessionPage';
 import PageWrapper from '../components/PageWrapper';
 import { useAppDispatch } from '../store';
-import { createNewSession } from '../slices/sessionSlice';
-
+import {
+  createNewSession,
+  selectCurrentSession,
+  selectIsSessionLoading,
+  Session,
+  SessionExercise,
+} from '../slices/sessionSlice';
+import { useSelector } from 'react-redux';
+import { CircularProgress } from '@mui/material';
+import ExerciseSelector from '../components/ExerciseSelector';
+import SessionExerciseDetail from '../components/SessionExerciseDetail';
 export interface LocationParams {
   pathname: string;
   state: SessionOptions;
@@ -15,6 +24,10 @@ export interface LocationParams {
   hash: string;
   key: string;
 }
+
+/////////////////////
+// STYLED COMPONENT
+/////////////////////
 
 type ExerciseTileProps = {
   isSelected?: boolean;
@@ -39,39 +52,35 @@ const ExerciseTile = styled(Container, {
   borderBottom: 'solid white 1px',
 }));
 
-const ExerciseDetails = styled(Container)(() => ({
-  backgroundColor: 'beige',
-  display: 'flex',
-  flexDirection: 'column',
-  justifyContent: 'center',
-  alignItems: 'center',
-  padding: 50,
-}));
-
+// TODO : il faut r&ésoudre le bordel entre exercises et sessionExercise
 function CurrentSessionPage() {
   const dispatch = useAppDispatch();
-  const { sportId, template, customExercises, name } = useLocation().state
-    .sessionOptions as SessionOptions;
+  const isSessionLoading = useSelector(selectIsSessionLoading);
+  const currentSession = useSelector(selectCurrentSession) as Session;
+
   const { data: sportsList } = useFetchSportsQuery();
   // const { data: allAvailableExercises } = useFetchExercisesQuery(sportId);
   const [exercisesList, setExerciseList] = useState<Exercise[]>([]);
   const [selectedExercise, setSelectedExercise] = useState<Exercise>();
 
   useEffect(() => {
-    dispatch(createNewSession({ sportId, name }));
-  }, []);
-
-  useEffect(() => {
-    if (template === 'custom' && customExercises) {
-      setExerciseList(customExercises);
-      setSelectedExercise(customExercises[0]);
-    } else {
-      getExerciseFromTemplate();
+    console.log('currentsessionsss', currentSession);
+    if (currentSession?.exercises) {
+      buildExerciseList(currentSession.exercises);
     }
-  }, []);
+  }, [currentSession?.id]);
 
-  const getExerciseFromTemplate = () => {
-    // TODO
+  const buildExerciseList = (exercises: SessionExercise[]) => {
+    const list = [...exercises].map((ex) => {
+      return {
+        id: ex.id,
+        name: ex.name,
+        description: ex.description,
+      };
+    });
+
+    setExerciseList(list);
+    setSelectedExercise(list[0]);
   };
 
   const {
@@ -85,26 +94,43 @@ function CurrentSessionPage() {
     <PageWrapper>
       <h1>
         Current Session -
-        {`${new Date()} - ${sportsList?.find((sport) => sport.id === sportId)?.name}`}
+        {` ${new Date(currentSession?.createdAt as Date).toLocaleDateString()} - ${
+          sportsList?.find((sport) => sport.id === currentSession?.sportId)?.name
+        }`}
       </h1>
-      <ExerciseContainer>
-        <ExerciseList>
-          {exercisesList.map((ex: Exercise) => (
-            <ExerciseTile
-              isSelected={ex.id === selectedExercise?.id}
-              onClick={() => setSelectedExercise(ex)}
-            >
-              {ex.name}
+      {isSessionLoading && <CircularProgress />}
+      {!currentSession ? (
+        <Container>Problem with session</Container>
+      ) : (
+        <ExerciseContainer>
+          <ExerciseList>
+            {exercisesList.map((ex: Exercise) => (
+              <ExerciseTile
+                isSelected={ex.id === selectedExercise?.id}
+                onClick={() => setSelectedExercise(ex)}
+                key={ex.id}
+              >
+                {ex.name}
+              </ExerciseTile>
+            ))}
+            <ExerciseTile>
+              <ExerciseSelector
+                selectedExercises={exercisesList}
+                setSelectedExercises={setExerciseList}
+                sportId={currentSession?.sportId}
+              />
             </ExerciseTile>
-          ))}
-          <ExerciseTile>Add an exercise</ExerciseTile>
-        </ExerciseList>
-        <ExerciseDetails>
-          <p>{selectedExercise?.name}</p>
-          <p>{selectedExercise?.description}</p>
-          <form></form>
-        </ExerciseDetails>
-      </ExerciseContainer>
+          </ExerciseList>
+
+          <SessionExerciseDetail
+            sessionId={currentSession.id}
+            selectedExercise={selectedExercise || null}
+            sessionExerciseDetails={currentSession.exercises.find(
+              (ex) => ex.id === selectedExercise?.id
+            )}
+          />
+        </ExerciseContainer>
+      )}
     </PageWrapper>
   );
 }
