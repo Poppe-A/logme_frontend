@@ -1,4 +1,4 @@
-import { Box, Container, styled } from '@mui/material';
+import { Box, Button, Container, styled } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useLocation } from 'react-router-dom';
@@ -8,6 +8,7 @@ import PageWrapper from '../components/PageWrapper';
 import { useAppDispatch } from '../store';
 import {
   createNewSession,
+  createSerie,
   selectCurrentSession,
   selectIsSessionLoading,
   Session,
@@ -40,7 +41,7 @@ const ExerciseContainer = styled(Container)(() => ({
 
 const ExerciseList = styled(Box)(() => ({
   backgroundColor: 'grey',
-  maxHeight: 300,
+  // maxHeight: 300,
   overflow: 'scroll',
 }));
 
@@ -68,7 +69,8 @@ function CurrentSessionPage() {
     if (currentSession?.exercises) {
       buildExerciseList(currentSession.exercises);
     }
-  }, [currentSession?.id]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentSession?.id, currentSession?.exercises?.length]);
 
   const buildExerciseList = (exercises: SessionExercise[]) => {
     const list = [...exercises].map((ex) => {
@@ -81,6 +83,26 @@ function CurrentSessionPage() {
 
     setExerciseList(list);
     setSelectedExercise(list[0]);
+  };
+
+  const addSelectedExercise = (exercise: Exercise) => {
+    // Adding an serie to a session is the way to add an exercise
+    //dispatch
+    const newSerie = {
+      sessionId: currentSession.id,
+      exerciseId: exercise.id,
+      value: 0,
+      order: 0,
+    };
+    dispatch(createSerie(newSerie));
+  };
+
+  const renderAddExerciseButton = (onClick: () => void) => {
+    return (
+      <ExerciseTile>
+        <Button onClick={onClick}>Add an exercise</Button>
+      </ExerciseTile>
+    );
   };
 
   const {
@@ -98,7 +120,7 @@ function CurrentSessionPage() {
           sportsList?.find((sport) => sport.id === currentSession?.sportId)?.name
         }`}
       </h1>
-      {isSessionLoading && <CircularProgress />}
+      {/* {isSessionLoading && <CircularProgress />} */}
       {!currentSession ? (
         <Container>Problem with session</Container>
       ) : (
@@ -113,18 +135,18 @@ function CurrentSessionPage() {
                 {ex.name}
               </ExerciseTile>
             ))}
-            <ExerciseTile>
-              <ExerciseSelector
-                selectedExercises={exercisesList}
-                setSelectedExercises={setExerciseList}
-                sportId={currentSession?.sportId}
-              />
-            </ExerciseTile>
+            <ExerciseSelector
+              selectedExercises={exercisesList}
+              addExercise={addSelectedExercise}
+              sportId={currentSession?.sportId}
+              componentRenderer={renderAddExerciseButton}
+            />
+
+            {/* <ExerciseTile> </ExerciseTile> */}
           </ExerciseList>
 
           <SessionExerciseDetail
             sessionId={currentSession.id}
-            selectedExercise={selectedExercise || null}
             sessionExerciseDetails={currentSession.exercises.find(
               (ex) => ex.id === selectedExercise?.id
             )}

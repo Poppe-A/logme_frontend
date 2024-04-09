@@ -3,7 +3,6 @@ import type { PayloadAction } from '@reduxjs/toolkit';
 import type { RootState } from '../store';
 import axios from 'axios';
 import { API_URLS } from '../urls';
-import { stat } from 'fs';
 import { SessionOptions } from '../pages/NewSessionPage';
 
 export interface SessionExercise {
@@ -13,7 +12,7 @@ export interface SessionExercise {
   series: Serie[];
 }
 
-interface Serie {
+export interface Serie {
   id: number;
   order: number;
   value: number;
@@ -43,8 +42,14 @@ export interface CreateSessionDto {
 export interface CreateSerieDto {
   sessionId: number;
   exerciseId: number;
+  value?: number;
+  order?: number;
+}
+
+export interface UpdateSerieDto {
+  id: number;
   value: number;
-  order: number;
+  sessionId: number;
 }
 
 interface SessionState {
@@ -76,13 +81,20 @@ export const createNewSession = createAsyncThunk(
   }
 );
 
-export const createSeries = createAsyncThunk(
-  'sport/createSerie',
-  async (series: CreateSerieDto[]) => {
-    console.log('serie', series);
-    for (const serie in series) {
-      await axios.post(API_URLS.sport.serie, serie);
-    }
+export const createSerie = createAsyncThunk('sport/createSerie', async (serie: CreateSerieDto) => {
+  console.log('serie', serie);
+  const response = await axios.post(API_URLS.sport.serie, serie);
+  console.log('create sereie sess', response);
+  return response.data;
+});
+
+export const updateSerie = createAsyncThunk(
+  'sport/updateSerie',
+  async (serie: UpdateSerieDto): Promise<Session> => {
+    console.log('update serie', serie);
+    const response = await axios.patch(API_URLS.sport.serie, serie);
+    console.log('update sereie sess', response);
+    return response.data;
   }
 );
 
@@ -116,11 +128,21 @@ export const sessionSlice = createSlice({
       //replace in allsessions
       state.currentSession = action.payload;
     });
-    builder.addCase(createSeries.pending, (state) => {
+    builder.addCase(createSerie.pending, (state) => {
       state.loading = true;
     });
-    builder.addCase(createSeries.fulfilled, (state) => {
+    builder.addCase(createSerie.fulfilled, (state, action) => {
+      console.log('action.', action.payload);
       state.loading = false;
+      state.currentSession = action.payload;
+    });
+    builder.addCase(updateSerie.pending, (state) => {
+      state.loading = true;
+    });
+    builder.addCase(updateSerie.fulfilled, (state, action) => {
+      state.loading = false;
+      state.currentSession = action.payload;
+      //TODO : update only one serie, to avoid refreshing the whole session component
     });
   },
 });

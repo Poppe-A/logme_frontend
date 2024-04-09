@@ -7,7 +7,8 @@ import { SessionExercise } from '../slices/sessionSlice';
 export interface IProps {
   sportId: number;
   selectedExercises: Exercise[];
-  setSelectedExercises: (exercises: Exercise[]) => void;
+  addExercise: (exercises: Exercise) => void;
+  componentRenderer: (onClick: () => void) => JSX.Element;
 }
 
 const ExerciseSelectorComponent = styled(Box)(() => ({
@@ -35,7 +36,8 @@ const ExerciseSelectorComponent = styled(Box)(() => ({
 const ExerciseSelector: React.FC<IProps> = ({
   sportId,
   selectedExercises,
-  setSelectedExercises,
+  addExercise,
+  componentRenderer,
 }) => {
   const { data: exercisesList } = useFetchExercisesQuery(sportId);
   const [exercisesChoiceList, setExercisesChoiceList] = useState<Exercise[]>([]);
@@ -60,14 +62,15 @@ const ExerciseSelector: React.FC<IProps> = ({
   };
 
   const addSelectedExercise = (exercise: Exercise) => {
-    setSelectedExercises([...selectedExercises, exercise]);
+    addExercise(exercise);
   };
 
   return (
     <>
-      {exercisesChoiceList.length ? (
-        <Button onClick={() => setIsExerciseModalOpen(true)}>Add an exercise</Button>
-      ) : null}
+      {exercisesChoiceList.length
+        ? componentRenderer(() => setIsExerciseModalOpen(true))
+        : // <Button onClick={() => setIsExerciseModalOpen(true)}>Add an exercise</Button>
+          null}
       <GenericModal
         isOpen={isExerciseModalOpen}
         onClose={() => setIsExerciseModalOpen(false)}

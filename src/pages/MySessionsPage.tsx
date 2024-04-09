@@ -22,7 +22,9 @@ function MySessionsPage() {
         sessions.map((session) => (
           <Accordion key={session.id}>
             <AccordionSummary>
-              {`${session.name} - ${session.sportName} - ${session.createdAt}`}
+              {`${session.name} - ${session.sportName} - ${new Date(
+                session.createdAt as Date
+              ).toLocaleDateString()}`}
               {!session.isFinished && (
                 <Button
                   onClick={(ev) => {

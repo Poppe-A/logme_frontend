@@ -17,13 +17,7 @@ import styled from '@emotion/styled';
 import RowCenteredContainer from '../components/RowCenteredContainer';
 import Dumbell from '../images/dumbbell.svg';
 import { useAppDispatch } from '../store';
-import {
-  CreateSerieDto,
-  chooseSession,
-  createNewSession,
-  createSeries,
-  selectCurrentSession,
-} from '../slices/sessionSlice';
+import { chooseSession, createNewSession, selectCurrentSession } from '../slices/sessionSlice';
 import ExerciseSelector from '../components/ExerciseSelector';
 import { useSelector } from 'react-redux';
 // TODO : load templates, put them in select
@@ -83,13 +77,13 @@ const NewSessionPage = () => {
 
   const [sessionChoice, setSessionChoice] = useState<string>('');
   const [selectedSport, setSelectedSport] = useState<string>('');
-  const [selectedExercises, setSelectedExercises] = useState<Exercise[]>([]);
+  const [selectedExerciseList, setSelectedExerciseList] = useState<Exercise[]>([]);
   const [sessionName, setSessionName] = useState('');
   const { data: sportsList } = useFetchSportsQuery();
 
-  useEffect(() => {
-    dispatch(chooseSession(1));
-  }, []);
+  // useEffect(() => {
+  //   dispatch(chooseSession(1));
+  // }, []);
 
   const startSession = () => {
     console.log('start session');
@@ -97,7 +91,7 @@ const NewSessionPage = () => {
       template: sessionChoice,
     };
     if (sessionChoice === 'custom') {
-      sessionOptions.customExercises = selectedExercises;
+      sessionOptions.customExercises = selectedExerciseList;
     }
 
     dispatch(
@@ -113,15 +107,19 @@ const NewSessionPage = () => {
 
   const handleSportChange = (value: string) => {
     setSelectedSport(value);
-    setSelectedExercises([]);
+    setSelectedExerciseList([]);
   };
 
   const removeSelectedExercise = (exercise: Exercise) => {
-    const index = selectedExercises.findIndex((ex) => ex.id === exercise.id);
+    const index = selectedExerciseList.findIndex((ex) => ex.id === exercise.id);
 
-    const exercises = [...selectedExercises];
+    const exercises = [...selectedExerciseList];
     exercises.splice(index, 1);
-    setSelectedExercises(exercises);
+    setSelectedExerciseList(exercises);
+  };
+
+  const renderAddExerciseButton = (onClick: () => void) => {
+    return <Button onClick={onClick}>Add an exercise</Button>;
   };
 
   return (
@@ -184,8 +182,8 @@ const NewSessionPage = () => {
             </FormControl>
             {selectedSport && (
               <ExercisesContainer>
-                {selectedExercises &&
-                  selectedExercises.map((exercise) => (
+                {selectedExerciseList &&
+                  selectedExerciseList.map((exercise) => (
                     <Box
                       key={exercise.id}
                       display="flex"
@@ -197,8 +195,11 @@ const NewSessionPage = () => {
                   ))}
                 <ExerciseSelector
                   sportId={parseInt(selectedSport)}
-                  selectedExercises={selectedExercises}
-                  setSelectedExercises={setSelectedExercises}
+                  selectedExercises={selectedExerciseList}
+                  addExercise={(ex: Exercise) => {
+                    setSelectedExerciseList([...selectedExerciseList, ex]);
+                  }}
+                  componentRenderer={renderAddExerciseButton}
                 />
               </ExercisesContainer>
             )}
