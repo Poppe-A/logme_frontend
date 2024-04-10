@@ -1,23 +1,22 @@
 import { Box, Button, Container, styled } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { useLocation } from 'react-router-dom';
-import { Exercise, useFetchExercisesQuery, useFetchSportsQuery } from '../services/sport.service';
+import { Exercise, useFetchSportsQuery } from '../services/sport.service';
 import { SessionOptions } from './NewSessionPage';
 import PageWrapper from '../components/PageWrapper';
 import { useAppDispatch } from '../store';
 import {
-  createNewSession,
   createSerie,
   selectCurrentSession,
   selectIsSessionLoading,
   Session,
   SessionExercise,
+  setSessionAsFinished,
 } from '../slices/sessionSlice';
 import { useSelector } from 'react-redux';
-import { CircularProgress } from '@mui/material';
 import ExerciseSelector from '../components/ExerciseSelector';
 import SessionExerciseDetail from '../components/SessionExerciseDetail';
+import { useNavigate } from 'react-router-dom';
 export interface LocationParams {
   pathname: string;
   state: SessionOptions;
@@ -58,6 +57,7 @@ function CurrentSessionPage() {
   const dispatch = useAppDispatch();
   const isSessionLoading = useSelector(selectIsSessionLoading);
   const currentSession = useSelector(selectCurrentSession) as Session;
+  const navigate = useNavigate();
 
   const { data: sportsList } = useFetchSportsQuery();
   // const { data: allAvailableExercises } = useFetchExercisesQuery(sportId);
@@ -86,8 +86,6 @@ function CurrentSessionPage() {
   };
 
   const addSelectedExercise = (exercise: Exercise) => {
-    // Adding an serie to a session is the way to add an exercise
-    //dispatch
     const newSerie = {
       sessionId: currentSession.id,
       exerciseId: exercise.id,
@@ -103,6 +101,11 @@ function CurrentSessionPage() {
         <Button onClick={onClick}>Add an exercise</Button>
       </ExerciseTile>
     );
+  };
+
+  const finishSession = () => {
+    dispatch(setSessionAsFinished(currentSession.id));
+    navigate('/', { replace: true });
   };
 
   const {
@@ -147,10 +150,11 @@ function CurrentSessionPage() {
 
           <SessionExerciseDetail
             sessionId={currentSession.id}
-            sessionExerciseDetails={currentSession.exercises.find(
+            sessionExerciseDetails={currentSession.exercises?.find(
               (ex) => ex.id === selectedExercise?.id
             )}
           />
+          <Button onClick={() => finishSession()}>Finish session</Button>
         </ExerciseContainer>
       )}
     </PageWrapper>

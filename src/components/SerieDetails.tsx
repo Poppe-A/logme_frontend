@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Button, Modal, TextField, styled, Menu, MenuItem } from '@mui/material';
-import { Serie, updateSerie } from '../slices/sessionSlice';
+import { Serie, deleteSeries, updateSerie } from '../slices/sessionSlice';
 import { Edit, Check } from '@mui/icons-material';
 import { Controller, useForm } from 'react-hook-form';
 import { useAppDispatch } from '../store';
@@ -73,6 +73,12 @@ const SerieDetails: React.FC<IProps> = ({ serie, isOpen }) => {
     setIsEditing(false);
   };
 
+  const deleteSerie = () => {
+    console.log('delete');
+    dispatch(deleteSeries([serie.id]));
+    handleMenuClose();
+  };
+
   return (
     <>
       {!isEditing ? (
@@ -102,7 +108,7 @@ const SerieDetails: React.FC<IProps> = ({ serie, isOpen }) => {
               {/* <Edit /> */}
               Edit
             </MenuItem>
-            <MenuItem>Delete</MenuItem>
+            <MenuItem onClick={() => deleteSerie()}>Delete</MenuItem>
           </Menu>
         </StyledBox>
       ) : (

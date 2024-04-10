@@ -9,6 +9,8 @@ export const API_URLS = {
   sport: {
     all: `${BASE_URL}/sport`,
     sessions: `${BASE_URL}/sport/session`,
-    serie: `${BASE_URL}/sport/session/serie`
+    finishSession: `${BASE_URL}/sport/session/setAsFinished`,
+    serie: `${BASE_URL}/sport/session/serie`,
+    lastSeries: `${BASE_URL}/sport/session/lastSeries`,
   }
 }

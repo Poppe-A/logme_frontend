@@ -56,6 +56,7 @@ interface SessionState {
   loading: boolean;
   sessions: Session[];
   currentSession: Session | null;
+  lastSeriesFromExercise: Serie[];
 }
 
 // Define the initial state using that type
@@ -63,6 +64,7 @@ const initialState: SessionState = {
   loading: false,
   sessions: [],
   currentSession: null,
+  lastSeriesFromExercise: [],
 };
 
 export const fetchUserSessions = createAsyncThunk('sport/fetchUserSessions', async () => {
@@ -98,6 +100,38 @@ export const updateSerie = createAsyncThunk(
   }
 );
 
+export const getLastSeries = createAsyncThunk(
+  'sport/lastSeriesFromExercise',
+  async (exerciseId: number): Promise<Serie[]> => {
+    console.log('lastSeriesFromExercise', exerciseId);
+    const response = await axios.get(`${API_URLS.sport.lastSeries}/${exerciseId}`);
+    console.log('lastSeriesFromExercise 2', response);
+    return response.data;
+  }
+);
+
+export const deleteSeries = createAsyncThunk(
+  'sport/deleteSeries',
+  async (serieIds: number[]): Promise<Session> => {
+    console.log('deleteSerie', serieIds);
+    const response = await axios.delete(API_URLS.sport.serie, { data: serieIds });
+    console.log('deleteSerie 2', response);
+    // update session
+    return response.data;
+  }
+);
+
+export const setSessionAsFinished = createAsyncThunk(
+  'sport/setSessionAsFinished',
+  async (sessionId: number): Promise<Session> => {
+    console.log('finishSession', sessionId);
+    const response = await axios.patch(`${API_URLS.sport.finishSession}/${sessionId}`);
+    console.log('finishSession 2', response);
+    // update session
+    return response.data;
+  }
+);
+
 export const sessionSlice = createSlice({
   name: 'session',
   // `createSlice` will infer the state type from the `initialState` argument
@@ -113,6 +147,7 @@ export const sessionSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
+    // TODO Il faudrait mieux gérer les loaders (session, series, update, ...)
     builder.addCase(fetchUserSessions.pending, (state) => {
       state.loading = true;
     });
@@ -144,6 +179,20 @@ export const sessionSlice = createSlice({
       state.currentSession = action.payload;
       //TODO : update only one serie, to avoid refreshing the whole session component
     });
+    builder.addCase(deleteSeries.fulfilled, (state, action) => {
+      state.loading = false;
+      console.log('deleted', action.payload);
+      state.currentSession = action.payload;
+      //TODO : update only one serie, to avoid refreshing the whole session component
+    });
+    builder.addCase(getLastSeries.fulfilled, (state, action) => {
+      state.loading = false;
+      state.lastSeriesFromExercise = action.payload;
+    });
+    builder.addCase(setSessionAsFinished.fulfilled, (state, action) => {
+      state.loading = false;
+      state.currentSession = null;
+    });
   },
 });
 
@@ -154,5 +203,6 @@ export const { chooseSession } = sessionSlice.actions;
 export const selectCurrentSession = (state: RootState) => state.session.currentSession;
 export const selectIsSessionLoading = (state: RootState) => state.session.loading;
 export const selectAllSessions = (state: RootState) => state.session.sessions;
+export const lastSeriesFromExercise = (state: RootState) => state.session.lastSeriesFromExercise;
 
 export default sessionSlice.reducer;

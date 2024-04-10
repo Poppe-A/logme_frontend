@@ -130,7 +130,7 @@ const NewSessionPage = () => {
           <p>Let's prepare the session :</p>
           <p>
             You can either choose one of your session template (or create a new one) or define a
-            custom session. You can still add exercise during your session.
+            custom session. You can still add exercises during your session.
           </p>
           <p></p>
         </Box>

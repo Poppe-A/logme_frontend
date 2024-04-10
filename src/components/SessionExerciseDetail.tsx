@@ -1,9 +1,15 @@
 import React, { useEffect } from 'react';
 import { Box, Button, Container, Divider, styled } from '@mui/material';
 import { Exercise } from '../services/sport.service';
-import { SessionExercise, createSerie } from '../slices/sessionSlice';
+import {
+  SessionExercise,
+  createSerie,
+  getLastSeries,
+  lastSeriesFromExercise,
+} from '../slices/sessionSlice';
 import SerieDetails from './SerieDetails';
 import { useAppDispatch } from '../store';
+import { useSelector } from 'react-redux';
 
 export interface IProps {
   // selectedExercise: Exercise | null; //TODO probably not needed
@@ -55,6 +61,13 @@ const SerieListContainer = styled(Container)(() => ({
 
 const SessionExerciseDetail: React.FC<IProps> = ({ sessionId, sessionExerciseDetails }) => {
   const dispatch = useAppDispatch();
+  const lastSeries = useSelector(lastSeriesFromExercise);
+
+  useEffect(() => {
+    if (sessionExerciseDetails) {
+      dispatch(getLastSeries(sessionExerciseDetails.id));
+    }
+  }, [sessionExerciseDetails]);
 
   const createNewSerie = () => {
     if (sessionExerciseDetails) {
@@ -82,13 +95,20 @@ const SessionExerciseDetail: React.FC<IProps> = ({ sessionId, sessionExerciseDet
           </ExerciseHeader>
 
           <GlobalSeriesContainer>
-            <SerieListContainer>
-              <h2>Last session series :</h2>
-            </SerieListContainer>
-            <Divider
-              orientation="vertical"
-              flexItem
-            />
+            {lastSeries?.length > 0 && (
+              <>
+                <SerieListContainer>
+                  <h2>Last session series :</h2>
+                  {lastSeries.map((serie) => (
+                    <h4 key={serie.id}>{serie.value}</h4>
+                  ))}
+                </SerieListContainer>
+                <Divider
+                  orientation="vertical"
+                  flexItem
+                />
+              </>
+            )}
             <SerieListContainer>
               <h2>My Series :</h2>
               {sessionExerciseDetails?.series.map((serie) => (
