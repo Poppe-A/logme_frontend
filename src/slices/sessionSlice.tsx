@@ -21,6 +21,7 @@ export interface Serie {
   exercise: {
     name: string;
   };
+  comment?: string;
 }
 
 export interface Session {
@@ -49,7 +50,7 @@ export interface CreateSerieDto {
 export interface UpdateSerieDto {
   id: number;
   value: number;
-  sessionId: number;
+  comment?: string;
 }
 
 interface SessionState {

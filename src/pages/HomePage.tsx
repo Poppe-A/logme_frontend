@@ -1,7 +1,4 @@
-import React, { useContext } from 'react';
-import { UserContext } from '../contexts/UserContext';
-import { Box, Button } from '@mui/material';
-import { useAuth } from '../provider/AuthProvider';
+import { Box } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import GenericCard from '../components/GenericCard';
 import PageWrapper from '../components/PageWrapper';
@@ -9,18 +6,11 @@ import { useSelector } from 'react-redux';
 import { selectCurrentSession } from '../slices/sessionSlice';
 
 function HomePage() {
-  const { user } = useContext(UserContext);
-  const { setToken } = useAuth();
   const navigate = useNavigate();
   const currentSession = useSelector(selectCurrentSession);
-  const handleLogout = () => {
-    setToken(null);
-    navigate('/', { replace: true });
-  };
 
   return (
     <PageWrapper>
-      <h1>Hello {user?.username} !</h1>
       <Box
         display="grid"
         gridTemplateColumns="repeat(2, 1fr)"
@@ -45,12 +35,6 @@ function HomePage() {
           <h2>My Profile</h2>
         </GenericCard>
       </Box>
-
-      <Button onClick={handleLogout}>Logout</Button>
-
-      <Button onClick={handleLogout}>New session</Button>
-      <Button onClick={handleLogout}>See my sessions</Button>
-      <Button onClick={() => navigate('/sport', { replace: true })}>See all sport</Button>
     </PageWrapper>
   );
 }

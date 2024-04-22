@@ -5,7 +5,7 @@ import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import LogoutPage from './pages/LogoutPage';
 import SignupPage from './pages/SignupPage';
-import SportPage from './pages/SportPage';
+import SportsPage from './pages/SportsPage';
 import SportExercisesPage from './pages/SportExercisesPage';
 import NewSessionPage from './pages/NewSessionPage';
 import CurrentSessionPage from './pages/CurrentSessionPage';
@@ -26,7 +26,7 @@ const Routes = () => {
     },
     {
       path: '/sport',
-      element: <SportPage />,
+      element: <SportsPage />,
     },
     {
       path: '/sport/:id',

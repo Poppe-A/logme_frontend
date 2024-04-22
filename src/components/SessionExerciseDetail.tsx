@@ -10,6 +10,7 @@ import {
 import SerieDetails from './SerieDetails';
 import { useAppDispatch } from '../store';
 import { useSelector } from 'react-redux';
+import { SecondaryParagraph, SimpleParagraph } from './Ui/SimpleParagraph';
 
 export interface IProps {
   // selectedExercise: Exercise | null; //TODO probably not needed
@@ -48,7 +49,7 @@ const GlobalSeriesContainer = styled(Container)(() => ({
   display: 'flex',
   flexDirection: 'row',
   justifyContent: 'center',
-  alignItems: 'center',
+  alignItems: 'flex-start',
 }));
 
 const SerieListContainer = styled(Container)(() => ({
@@ -100,7 +101,16 @@ const SessionExerciseDetail: React.FC<IProps> = ({ sessionId, sessionExerciseDet
                 <SerieListContainer>
                   <h2>Last session series :</h2>
                   {lastSeries.map((serie) => (
-                    <h4 key={serie.id}>{serie.value}</h4>
+                    <Box
+                      display="flex"
+                      alignItems="center"
+                      gap="10px"
+                      marginBottom="20px"
+                      key={serie.id}
+                    >
+                      <SimpleParagraph>{serie.value}</SimpleParagraph>
+                      {serie.comment && <SecondaryParagraph>{serie.comment}</SecondaryParagraph>}
+                    </Box>
                   ))}
                 </SerieListContainer>
                 <Divider

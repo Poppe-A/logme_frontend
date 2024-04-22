@@ -78,6 +78,7 @@ function CurrentSessionPage() {
         id: ex.id,
         name: ex.name,
         description: ex.description,
+        sportId: currentSession.sportId,
       };
     });
 
@@ -117,12 +118,28 @@ function CurrentSessionPage() {
 
   return (
     <PageWrapper>
-      <h1>
-        Current Session -
-        {` ${new Date(currentSession?.createdAt as Date).toLocaleDateString()} - ${
-          sportsList?.find((sport) => sport.id === currentSession?.sportId)?.name
-        }`}
-      </h1>
+      <h2>Current Session</h2>
+      <Box
+        width="100%"
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+        paddingInline="24px"
+        boxSizing="border-box"
+      >
+        <h1>
+          {`${sportsList?.find((sport) => sport.id === currentSession?.sportId)?.name} - ${
+            currentSession?.name
+          } - ${new Date(currentSession?.createdAt as Date).toLocaleDateString()}`}
+        </h1>
+        <Button
+          onClick={() => finishSession()}
+          variant="outlined"
+          // sx={{ alignSelf: 'center' }}
+        >
+          Finish session
+        </Button>
+      </Box>
       {/* {isSessionLoading && <CircularProgress />} */}
       {!currentSession ? (
         <Container>Problem with session</Container>
@@ -154,7 +171,6 @@ function CurrentSessionPage() {
               (ex) => ex.id === selectedExercise?.id
             )}
           />
-          <Button onClick={() => finishSession()}>Finish session</Button>
         </ExerciseContainer>
       )}
     </PageWrapper>

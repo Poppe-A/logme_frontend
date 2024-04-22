@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Button, Modal, TextField, styled, Menu, MenuItem } from '@mui/material';
 import { Serie, deleteSeries, updateSerie } from '../slices/sessionSlice';
-import { Edit, Check } from '@mui/icons-material';
+import { Edit, Check, Clear } from '@mui/icons-material';
 import { Controller, useForm } from 'react-hook-form';
 import { useAppDispatch } from '../store';
+import { SecondaryParagraph, SimpleParagraph } from './Ui/SimpleParagraph';
 
 export interface IProps {
   serie: Serie;
@@ -17,14 +18,12 @@ const StyledModal = styled(Modal)(() => ({
 }));
 
 const StyledBox = styled(Box)(() => ({
-  width: '150px',
+  width: '270px',
   display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  gap: 20,
+  flexDirection: 'column',
+  alignItems: 'start',
   padding: 10,
   borderRadius: '10px',
-  // backgroundColor: 'white',
   boxShadow: 'rgba(0, 0, 0, 0.1) 0px 4px 12px',
 }));
 
@@ -32,6 +31,7 @@ const SerieDetails: React.FC<IProps> = ({ serie, isOpen }) => {
   const [isEditing, setIsEditing] = useState(isOpen ?? false);
   const dispatch = useAppDispatch();
 
+  // TODO factorie and create menu component
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const openMenu = Boolean(anchorEl);
   const handleMenuClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -48,7 +48,8 @@ const SerieDetails: React.FC<IProps> = ({ serie, isOpen }) => {
   // }, [])
 
   type FormValues = {
-    repNumber: string;
+    value: string;
+    comment: string;
   };
 
   const {
@@ -60,12 +61,13 @@ const SerieDetails: React.FC<IProps> = ({ serie, isOpen }) => {
   } = useForm<FormValues>();
 
   const onSubmit = (data: FormValues) => {
+    console.log('dadadada', data, serie);
     console.log('isDirty', isDirty);
     if (isDirty) {
       const updatedSerie = {
         id: serie.id,
-        value: parseInt(data.repNumber),
-        sessionId: serie.sessionId,
+        value: parseInt(data.value),
+        comment: data.comment,
       };
       dispatch(updateSerie(updatedSerie));
     }
@@ -83,55 +85,89 @@ const SerieDetails: React.FC<IProps> = ({ serie, isOpen }) => {
     <>
       {!isEditing ? (
         <StyledBox>
-          <p>{serie.value} reps</p>
-          <Button
-            id="basic-button"
-            aria-controls={openMenu ? 'basic-menu' : undefined}
-            aria-haspopup="true"
-            aria-expanded={openMenu ? 'true' : undefined}
-            onClick={handleMenuClick}
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+            width="100%"
           >
-            ...
-          </Button>
-          <Menu
-            id="basic-menu"
-            anchorEl={anchorEl}
-            open={openMenu}
-            onClose={handleMenuClose}
-          >
-            <MenuItem
-              onClick={() => {
-                handleMenuClose();
-                setIsEditing(true);
-              }}
+            <SimpleParagraph>{serie.value} reps</SimpleParagraph>
+            <Button
+              id="basic-button"
+              aria-controls={openMenu ? 'basic-menu' : undefined}
+              aria-haspopup="true"
+              aria-expanded={openMenu ? 'true' : undefined}
+              onClick={handleMenuClick}
+              style={{ color: 'black' }}
             >
-              {/* <Edit /> */}
-              Edit
-            </MenuItem>
-            <MenuItem onClick={() => deleteSerie()}>Delete</MenuItem>
-          </Menu>
+              ...
+            </Button>
+            <Menu
+              id="basic-menu"
+              anchorEl={anchorEl}
+              open={openMenu}
+              onClose={handleMenuClose}
+            >
+              <MenuItem
+                onClick={() => {
+                  handleMenuClose();
+                  setIsEditing(true);
+                }}
+              >
+                Edit
+              </MenuItem>
+              <MenuItem onClick={() => deleteSerie()}>Delete</MenuItem>
+            </Menu>
+          </Box>
+          {serie.comment && <SecondaryParagraph>{serie.comment}</SecondaryParagraph>}
         </StyledBox>
       ) : (
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <Controller
-            control={control}
-            name="repNumber"
-            defaultValue={serie.value.toString()}
-            render={({ field }) => (
-              <TextField
-                {...field}
-                label="Number"
-                style={{ width: '100px' }}
+        <StyledBox>
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            style={{ display: 'flex', marginLeft: 'auto' }}
+          >
+            <Box
+              display="flex"
+              flexDirection="column"
+              alignItems="center"
+              gap="5px"
+              marginTop="10px"
+            >
+              <Controller
+                control={control}
+                name="value"
+                defaultValue={serie.value.toString()}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    label="Value"
+                    style={{ width: '150px' }}
+                  />
+                )}
               />
-            )}
-          />
-          <Button type="submit">
-            <Check
-              onClick={() => setIsEditing(true)}
-              sx={{ cursor: 'pointer', color: 'black' }}
-            />
-          </Button>
-        </form>
+              <Controller
+                control={control}
+                name="comment"
+                defaultValue={serie.comment ?? ''}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    label="Comment"
+                    style={{ width: '150px' }}
+                  />
+                )}
+              />
+            </Box>
+
+            <Button type="submit">
+              <Check sx={{ cursor: 'pointer', color: 'black' }} />
+            </Button>
+            <Button onClick={() => setIsEditing(false)}>
+              <Clear sx={{ cursor: 'pointer', color: 'black' }} />
+            </Button>
+          </form>
+        </StyledBox>
       )}
     </>
   );

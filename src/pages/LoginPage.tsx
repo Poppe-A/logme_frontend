@@ -1,4 +1,4 @@
-import { Button, TextField, useControlled } from '@mui/material';
+import { Button, Container, TextField, Typography, styled, useControlled } from '@mui/material';
 import React, { useContext, useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useAuth } from '../provider/AuthProvider';
@@ -6,6 +6,26 @@ import { useNavigate } from 'react-router-dom';
 import { login } from '../services/auth.service';
 import { UserContext } from '../contexts/UserContext';
 import { AxiosError } from 'axios';
+import { colors } from '../theme/customColors';
+import { FullSizeContainer, StyledTextField } from '../theme/basicComponent';
+
+export const LoginPageContainer = styled(FullSizeContainer)(() => ({
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  backgroundColor: colors.backgroundBase,
+}));
+
+export const LoginForm = styled('form')(() => ({
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  gap: '20px',
+  // justifySelf: 'center',
+  // placeSelf: 'center',
+  // alignSelf: 'center',
+  marginTop: '200px',
+}));
 
 type FormData = {
   username: string;
@@ -50,9 +70,9 @@ function LoginPage() {
   };
 
   return (
-    <div className="Login">
-      <h1>Login page</h1>
-      <form>
+    <FullSizeContainer>
+      <Typography variant="h1">Logme App</Typography>
+      <LoginForm>
         <Controller
           control={control}
           name="username"
@@ -63,6 +83,7 @@ function LoginPage() {
               variant="outlined"
               onChange={onChange}
               value={value}
+              color="primary"
             />
           )}
         />
@@ -82,11 +103,16 @@ function LoginPage() {
             />
           )}
         />
-        {loginError && <p>{loginError}</p>}
+        {loginError && <Typography color="primary.contrastText">{loginError}</Typography>}
 
-        <Button onClick={handleSubmit(handleLogin)}>Log in</Button>
-      </form>
-    </div>
+        <Button
+          variant="outlined"
+          onClick={handleSubmit(handleLogin)}
+        >
+          Log in
+        </Button>
+      </LoginForm>
+    </FullSizeContainer>
   );
 }
 

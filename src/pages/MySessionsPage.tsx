@@ -13,6 +13,7 @@ import { useAppDispatch } from '../store';
 import { chooseSession, fetchUserSessions, selectAllSessions } from '../slices/sessionSlice';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import { SimpleParagraph } from '../components/Ui/SimpleParagraph';
 
 function MySessionsPage() {
   const sessions = useSelector(selectAllSessions);
@@ -37,7 +38,10 @@ function MySessionsPage() {
   const AccordionSummaryContainer = styled(Box)(() => ({
     width: '100%',
     display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     gap: '10px',
+    paddingBlock: '5px',
   }));
 
   return (
@@ -46,17 +50,16 @@ function MySessionsPage() {
         {sessions &&
           sessions.map((session) => (
             <SessionAccordion key={session.id}>
-              {/* <AccordionSummary>
-              {`${session.name} - ${session.sportName} - ${new Date(
-                session.createdAt as Date
-              ).toLocaleDateString()}`}
-             
-            </AccordionSummary> */}
               <AccordionSummary>
                 <AccordionSummaryContainer>
-                  <p>{session.name}</p>
-                  <p>{session.sportName}</p>
-                  <p>{new Date(session.createdAt as Date).toLocaleDateString()}</p>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    <SimpleParagraph>
+                      {session.sportName} -{' '}
+                      {new Date(session.createdAt as Date).toLocaleDateString()}
+                    </SimpleParagraph>
+
+                    <SimpleParagraph>{session.name}</SimpleParagraph>
+                  </Box>
                   {!session.isFinished && (
                     <Button
                       onClick={(ev) => {
